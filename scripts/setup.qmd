@@ -1,0 +1,148 @@
+---
+title: "Homework Two"
+author: "Alexandria Kaplan"
+date: today
+execute:
+  echo: true
+  eval: false
+  warning: false
+  message: false
+---
+# Project set-up 
+Setting up project and files 
+```{bash}
+
+mkdir -p  ./hw2_alex/{data,results,scripts}
+curl -L -o ./data/Stickle_RNAseq.tsv https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Data_Folder/Stickle_RNAseq.tsv
+```
+
+# Data clean-up
+
+Ok great got the terminal set up and now we just need to get this good stuff into R and do some data transformations
+```{r}
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+
+setwd ("/Users/alex/UO_codes/comptools/hw2_alex")
+out_dir <- "./data"
+raw_data <- read_tsv("./data/Stickle_RNAseq.tsv")
+range <- 5:ncol(raw_data)
+long_fish <- pivot_longer(raw_data, 
+    cols = range, 
+    names_to = "Gene",
+    values_to = "Expression") #defines the value or measurement
+write.csv(long_fish, file.path(out_dir, "long_fish.csv"))
+```
+
+Long formatted data is looking good, but how am I to choose which genes to look at without making a table to give me a statistical summary of all of them so I can choose which are the most interesting?
+
+# Finding most variable genes
+
+Here is the code for the second plot
+
+```{r}
+summary_table <- long_fish |>
+    group_by(Gene) |>
+     summarise(n = n(),
+            mean = mean(Expression),
+            sd = sd(Expression),
+            median = median(Expression),)
+    write.csv(summary_table, file.path(out_dir, "gene_expression_summary.csv"),  row.names = FALSE)
+```
+
+Now I want to look at the most highly variable genes, gonna steal this straight from the single cell book. Except I will not be rewritting everything into a Seurat object and instead just doing it the good old fasion way
+
+## Log transformation
+```{r}
+log_fish <- summary_table |>
+  mutate(across(where(is.numeric), log))
+write.csv(log_fish, file.path(out_dir, "log_gene_expression_summary.csv"),  row.names = FALSE)
+```
+
+asked claude how to use `mutate` to get log of only numberic values
+
+Now plotting mean and variance onto the same grah
+```{r}
+plot_dir <- "./results"
+
+HVG_plot <- ggplot(log_fish, aes(x = mean, y = sd)) +
+  geom_point(size = 2, color = "#4A5759") +
+  geom_smooth(method = "lm", se = FALSE, color = "#EDAF88") +
+  labs(title = "Stickleback Highly Variable Genes", subtitle = "expression counts are log-transformed", x = "Mean expression", y = "expression varience")
+ggsave(file.path(plot_dir, "Stickle_HVG.png"), plot = HVG_plot, width = 8, height = 6, dpi = 300)
+```
+
+ok great so I have my plot, but I want to determine, which genes are actually the most variable. To do this I started by asking claude how I could get the vector value of each point from the line of best fit.
+
+## Fidning top HVG
+
+```{r}
+resid_df <- log_fish |>
+  mutate(fit_sd  = predict(lm(sd ~ mean)),
+         dist    = sd - fit_sd,
+         dist_z  = dist / stats::sd(dist),
+         high    = dist_z > 1.5) |>
+  ungroup() 
+write.csv(resid_df, file.path(out_dir, "resid_df.csv"),  row.names = FALSE)
+  
+```
+
+Asked Claude how I can get the distance of each point from the line of best fit or expected vector. Fitted is the y value the regression line prediects, and then we subract the actual y from that to see if it is above or below. Then it gets transformed into units of redisual sd. I moved the standard cutoff or high to be 1.5 because there is not a ton of varience, which yeilded 12 highly variable genes.
+
+Now let's plot the genes that were the farthest from the line
+```{r}
+library(ggrepel)
+
+
+HVG_plot <- ggplot(resid_df, aes(x = mean, y = sd)) +
+  geom_point(aes(color = dist_z > 1.5), size = 2,) +
+  geom_smooth(method = "lm", se = FALSE, color = "#EDAF88") +
+  geom_text_repel(data = filter(resid_df, dist_z > 1.5),
+                  aes(label = Gene)) +
+    scale_color_manual(values = c("FALSE" = "#B0C4B1", "TRUE" = "#4A5759"),
+                     guide = "none") +
+  labs(title = "Stickleback Highly Variable Genes", subtitle = "expression counts are log-transformed", x = "Mean expression", y = "expression variance")
+ggsave(file.path(plot_dir, "Labeled_Stickle_HVG.png"), plot = HVG_plot, width = 8, height = 6, dpi = 300)
+```
+
+with much trial and error between me and Claude I was able to label and color the specific genes of interest based on their `dist_z` which acts as explaining how much of the varience can be explained by relationship to mean, and which genes have greater-than-expected varient values
+
+# Choose your character (your four genes)
+
+I went with the genes with the highest `dist_z` which are... drumroll please... Gene280, Gene361, Gene448, and Gene526!!!
+
+```{bash}
+cd ./hw2_alex/data
+grep -E "Gene280|Gene361|Gene448|Gene526|median" gene_expression_summary.csv > four_fish.csv
+```
+
+Imma be honest idk which plot is the "destination figure" but the one from the slides was pretty sick, and I just changed the genes
+
+get the expression levels in log
+```{r}
+log_long_fish <- long_fish |>
+  mutate(across(where(is.numeric), log))
+write.csv(log_long_fish, file.path(out_dir, "log_gene_expression.csv"),  row.names = FALSE)
+```
+
+making violin plot
+
+```{r}
+four_fish_violin <- log_long_fish |>
+  filter(Gene %in% c("Gene280", "Gene361", "Gene448", "Gene526")) |>
+  ggplot(aes(Genotype, Expression, fill = Microbiota)) +
+  geom_violin(alpha = 0.4, color = NA, position = position_dodge(0.8)) +
+  geom_point(aes(color = Microbiota), alpha = 0.6, size = 1.2,
+             position = position_jitterdodge(jitter.width = 0.08, dodge.width = 0.8)) +
+  scale_fill_viridis_d(end = 0.7) + scale_color_viridis_d(end = 0.7) +
+  facet_wrap(~ Gene, scales = "free_y") +
+  labs(x = "Host genotype", y = "Read count of each gene",
+       title = "Stickleback gut RNA-seq of four most variable genes",
+       subtitle = "Each point is one fish; violins show the full distribution") +
+  theme_minimal(base_size = 14) + theme(legend.position = "top")
+ ggsave(file.path(plot_dir, "My_gene_violin.png"), plot = four_fish_violin, width = 8, height = 6, dpi = 300)
+```
+
+need to figure out how to "fail politely"
+or funfact that magically disappeared this morning so I will not be doing that
