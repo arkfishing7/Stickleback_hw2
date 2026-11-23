@@ -105,7 +105,7 @@ ggsave(file.path(plot_dir, "Stickle_HVG.png"), plot = HVG_plot, width = 8, heigh
 In order to do this, the expected variance was calculated for each gene's mean value, meaning that the code will yeild the y value that will fall exactly on the line of best fit for $y = $mx + $b $. The actual standard deviation was then subtracted from the expected distribution and transformed into units of standard deviations. The `high` value can be changed, but a threshold of 1.5 yeilds the top 12 HVG which can be seen in @tbl-dist_z.
 ```{r}
 #| label: tbl-dist_z
-resid_df <- summary_table |>
+resid_df <- log_fish |>
   mutate(fit_sd  = predict(lm(sd ~ mean)),
          dist    = sd - fit_sd,
          dist_z  = dist / stats::sd(dist),
@@ -146,7 +146,7 @@ Using the data from @tbl-dist_z the top four genes were isolated; Gene280, Gene3
 ## Getting mean and standard deviation summary of top HVG
 ```{bash}
 #| label: data set isolating only genes of interest
-cd ./hw2_alex/data
+
 grep -E "Gene280|Gene361|Gene448|Gene526|median" gene_expression_summary.csv > four_fish.csv
 ```
 
