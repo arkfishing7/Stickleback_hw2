@@ -182,4 +182,4 @@ Dataset was loaded in from the Cresko Lab public git repository and processed us
 
 # Use of AI Statement
 
-Code was written with the assistance of Claude to point out syntax errors and how to write out a code that would highlight genes that are unusually high in standard deviation.
+Code was written with the assistance of Claude to point out syntax errors and how to write out a code that would highlight genes that are unusually high in standard deviation. Claude was also used to troubleshoot and play with uploading to github from the terminal which after much trial and error I am slowly getting the hang of.
