@@ -25,7 +25,6 @@ The following code will load the data from the Cresko Lab's public git repositor
 #| label: Loading in dataset
 mkdir -p  ~/hw2_alex/{data,results,scripts}
 curl -L -o ~/hw2_alex/data/Stickle_RNAseq.tsv https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Data_Folder/Stickle_RNAseq.tsv
-mv report.qmd ~/hw2_alex/scripts
 ```
 
 The dataset should now be loaded in, with each line representing an individual fish, and each column giving the count expression of 600 genes. In order to use this dataset for analysis, it needs to be both transformed into long data format so that each line is the expression of a single gene for each fish, and then log-transforming the gene counts.
@@ -157,7 +156,7 @@ Using the data from @tbl-dist_z the top four genes were isolated; Gene**280**, G
 ```{bash}
 #| label: data set isolating only genes of interest
 
-grep -E "Gene280|Gene361|Gene448|Gene526|median" ~/hw2_alex/data/gene_expression_summary.csv > four_fish.csv
+grep -E "Gene280|Gene361|Gene448|Gene526|median" ~/hw2_alex/data/gene_expression_summary.csv > ~/hw2_alex/data/four_fish.csv
 ```
 
 ## Comparing expression of HVG across microbiota and genotype
@@ -198,4 +197,4 @@ Dataset was loaded in from the Cresko Lab public git repository and processed us
 
 # Use of AI Statement
 
-Code was written with the assistance of Claude to point out syntax errors and how to write out a code that would highlight genes that are unusually high in standard deviation. Claude was also used to troubleshoot and play with uploading to github from the terminal which after much trial and error I am slowly getting the hang of.
+Code was written with the assistance of Claude to point out syntax errors and how to write out a code that would highlight genes that are unusually high in standard deviation. Claude was also used to troubleshoot and play with uploading to github from the terminal which after much trial and error I am slowly getting the hang of. Troubleshot why figures and tables were not appearing in the final html file.
