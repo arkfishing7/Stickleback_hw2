@@ -38,6 +38,7 @@ library(readr)
 ```
 ```{r}
 #| label: transforming data into long format
+setwd ("~/hw2_alex/")
 out_dir <- "./data"
 raw_data <- read_tsv("./data/Stickle_RNAseq.tsv")
 range <- 5:ncol(raw_data)
