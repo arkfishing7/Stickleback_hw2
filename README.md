@@ -1,2 +1,2 @@
 # Stickleback_hw2
-comp-tools hw2 assignment using Stickleback dataset
+comp-tools hw2 assignment using Stickleback dataset from the Cresko Lab at the University of Oregon. It has 80 fish from two genetic backgrounds and two microbiota treatments. For all 80 fish, 600 genes were counted. This code transforms this dataset into long format, log transforms it, and picks out the top highly variable genes. It then plots the count of these genes as a violin plot to compare the expression across both microbiomes and backgrounds.
