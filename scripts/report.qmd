@@ -25,6 +25,7 @@ The following code will load the data from the Cresko Lab's public git repositor
 #| label: Loading in dataset
 mkdir -p  ~/hw2_alex/{data,results,scripts}
 curl -L -o ~/hw2_alex/data/Stickle_RNAseq.tsv https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Data_Folder/Stickle_RNAseq.tsv
+mv report.qmd ~/hw2_alex/scripts
 ```
 
 The dataset should now be loaded in, with each line representing an individual fish, and each column giving the count expression of 600 genes. In order to use this dataset for analysis, it needs to be both transformed into long data format so that each line is the expression of a single gene for each fish, and then log-transforming the gene counts.
@@ -101,7 +102,7 @@ HVG_plot1
 ```
 ```{r}
 #| label: saving fig-mean-sd-plot
-ggsave(file.path(plot_dir, "Stickle_HVG.png"), plot = HVG_plot1, width = 8, height = 8, dpi = 300)
+ggsave(file.path(plot_dir, "Stickle_HVG.png"), plot = HVG_plot1, width = 8, height = 6, dpi = 300)
 ```
 
 ## Finding genes with high variability
@@ -145,7 +146,7 @@ HVG_plot2
 ```
 ```{r}
 #| label: saving fig-HVG
-ggsave(file.path(plot_dir, "Labeled_Stickle_HVG.png"), plot = HVG_plot2, width = 8, height = 8, dpi = 300)
+ggsave(file.path(plot_dir, "Labeled_Stickle_HVG.png"), plot = HVG_plot2, width = 8, height = 6, dpi = 300)
 ```
 
 # Isolation of top four variable genes
@@ -184,7 +185,7 @@ four_fish_violin
 ```
 ```{r}
 #| label: saving fig-four-genes
- ggsave(file.path(plot_dir, "My_gene_violin.png"), plot = four_fish_violin, width = 8, height = 10, dpi = 300)
+ ggsave(file.path(plot_dir, "My_gene_violin.png"), plot = four_fish_violin, width = 8, height = 6, dpi = 300)
 ```
 
 # Discussion
