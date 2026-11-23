@@ -38,8 +38,7 @@ library(readr)
 ```
 ```{r}
 #| label: transforming data into long format
-setwd ("~/hw2_alex/")
-out_dir <- "./data"
+out_dir <- "~/hw2_alex/data"
 raw_data <- read_tsv("./data/Stickle_RNAseq.tsv")
 range <- 5:ncol(raw_data)
 long_fish <- pivot_longer(raw_data, 
@@ -87,7 +86,7 @@ write.csv(log_fish, file.path(out_dir, "log_gene_expression_summary.csv"),  row.
 #| fig-cap: "**Varience of gene expression increases as mean gene expression increases. Each point represents one of the 600 genes that were counted for all 80 fish."
 #| fig-width: 6
 #| fig-height: 3.5
-plot_dir <- "./results"
+plot_dir <- "~/hw2_alex/results"
 
 HVG_plot <- ggplot(log_fish, aes(x = mean, y = sd)) +
   geom_point(size = 2, color = "#4A5759") +
