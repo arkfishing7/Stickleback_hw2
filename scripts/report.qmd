@@ -38,7 +38,6 @@ library(readr)
 ```
 ```{r}
 #| label: transforming data into long format
-setwd ("~/hw2_alex")
 out_dir <- "./data"
 raw_data <- read_tsv("./data/Stickle_RNAseq.tsv")
 range <- 5:ncol(raw_data)
@@ -68,7 +67,7 @@ $$ \sigma = \sqrt{\frac{\sum_{i=1}^{N} (x_i - \mu)^2}{N}}$$
 ```{r}
 #| label: tbl-summary
 
-summary_table <- log_long_fish |>
+summary_table <- long_fish |>
     group_by(Gene) |>
      summarise(n = n(),
             mean = mean(Expression),
@@ -77,13 +76,19 @@ summary_table <- log_long_fish |>
     write.csv(summary_table, file.path(out_dir, "gene_expression_summary.csv"),  row.names = FALSE)
 ```
 ```{r}
+#| label: tbl-summary-log
+log_fish <- summary_table |>
+  mutate(across(where(is.numeric), log))
+write.csv(log_fish, file.path(out_dir, "log_gene_expression_summary.csv"),  row.names = FALSE)
+```
+```{r}
 #| label: fig-mean-sd-plot
 #| fig-cap: "**Varience of gene expression increases as mean gene expression increases. Each point represents one of the 600 genes that were counted for all 80 fish."
 #| fig-width: 6
 #| fig-height: 3.5
 plot_dir <- "./results"
 
-HVG_plot <- ggplot(log_long_fish, aes(x = mean, y = sd)) +
+HVG_plot <- ggplot(log_fish, aes(x = mean, y = sd)) +
   geom_point(size = 2, color = "#4A5759") +
   geom_smooth(method = "lm", se = FALSE, color = "#EDAF88") +
   labs(title = "Stickleback Highly Variable Genes", subtitle = "expression counts are log-transformed", x = "Mean expression", y = "expression varience")
